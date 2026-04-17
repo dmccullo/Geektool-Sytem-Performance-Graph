@@ -23,7 +23,12 @@ This project is intentionally separated from `Geektool-System-Perfomance-geeklet
 ## Install (simple)
 
 ```bash
-cd "/Users/dmccullo/dev/Geektool-Sytem-Performance-Graph"
+mkdir -p ~/Documents/Geektool
+cd ~/Documents/Geektool
+if [ ! -d "Geektool-Sytem-Performance-Graph" ]; then
+  git clone https://github.com/dmccullo/Geektool-Sytem-Performance-Graph.git
+fi
+cd Geektool-Sytem-Performance-Graph
 ./install.sh
 ```
 
