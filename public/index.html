@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>System Performance</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="panel">
+      <div class="title cpu-title">CPU</div>
+      <div id="cputemp" class="stats cputemp">—</div>
+
+      <div class="title mem-title">Mem</div>
+      <div id="mem-data" class="stats mem-data">—</div>
+
+      <div id="battery-row" class="stats battery-row"></div>
+
+      <table class="net-table stats">
+        <tr>
+          <td class="net-spacer"></td>
+          <td class="h1">Up</td>
+          <td id="net-up" class="net-value">—</td>
+        </tr>
+        <tr>
+          <td class="net-spacer"></td>
+          <td class="h1">Down</td>
+          <td id="net-down" class="net-value">—</td>
+        </tr>
+      </table>
+
+      <canvas id="rings" width="240" height="150" class="rings-canvas"></canvas>
+      <canvas id="chart-up" width="100" height="35" class="chart chart-up"></canvas>
+      <canvas id="chart-down" width="100" height="35" class="chart chart-down"></canvas>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

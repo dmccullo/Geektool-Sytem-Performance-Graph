@@ -1,0 +1,120 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    ui-monospace,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Liberation Mono",
+    "Courier New",
+    monospace;
+  font-size: 9px;
+  line-height: 1.1;
+  color: #f36a33;
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+.panel {
+  position: relative;
+  width: 280px;
+  min-height: 210px;
+  background: transparent;
+}
+
+.title {
+  position: absolute;
+  font-weight: 700;
+  color: #f36a33;
+}
+
+.stats {
+  position: absolute;
+}
+
+.cpu-title {
+  top: 73px;
+  left: 116px;
+  transform: translate(-50%, -50%);
+  font-size: 22px;
+}
+
+.cputemp {
+  top: 70px;
+  left: 68px;
+  font-size: 12px;
+}
+
+.mem-title {
+  top: 94px;
+  left: 176px;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+}
+
+.mem-data {
+  top: 127px;
+  left: 134px;
+  text-align: right;
+  width: 92px;
+}
+
+.battery-row {
+  top: 148px;
+  left: 98px;
+  font-size: 9px;
+  color: #f36a33;
+  max-width: 170px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.net-table {
+  top: 168px;
+  left: 98px;
+  width: 160px;
+  border-collapse: collapse;
+}
+
+.net-spacer {
+  width: 0;
+}
+
+.net-value {
+  width: 85px;
+  text-align: right;
+}
+
+.h1 {
+  color: #f36a33;
+  font-weight: bold;
+  width: 40px;
+}
+
+.rings-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.chart {
+  position: absolute;
+  left: -6px;
+  pointer-events: none;
+}
+
+.chart-up {
+  top: 151px;
+}
+
+.chart-down {
+  top: 164px;
+}
