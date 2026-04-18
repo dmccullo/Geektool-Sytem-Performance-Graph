@@ -32,10 +32,12 @@ body {
   position: absolute;
   font-weight: 700;
   color: #f36a33;
+  z-index: 3;
 }
 
 .stats {
   position: absolute;
+  z-index: 3;
 }
 
 .cpu-title {
@@ -114,12 +116,14 @@ body {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 1;
   pointer-events: none;
 }
 
 .chart {
   position: absolute;
   left: -6px;
+  z-index: 1;
   pointer-events: none;
 }
 

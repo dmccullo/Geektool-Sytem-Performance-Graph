@@ -79,7 +79,11 @@ function readExternalIpViaDig(): string | null {
         .map((s) => s.trim())
         .filter(Boolean)[0];
       if (!out) continue;
-      if (/^[\d.]+$/.test(out) || /^[0-9a-f:.]+$/i.test(out)) {
+      if (
+        /^[\d.]+$/.test(out) ||
+        /^[0-9a-f:.]+$/i.test(out) ||
+        (/^[\d.a-f:%]+$/i.test(out) && out.length <= 45 && !/\s/.test(out))
+      ) {
         return out;
       }
     } catch {

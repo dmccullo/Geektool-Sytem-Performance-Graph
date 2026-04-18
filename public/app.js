@@ -111,46 +111,11 @@
   }
 
   function renderMetrics(m) {
-    if (!ctx || !ringsCanvas) return;
     var cores = (m && m.cpu && m.cpu.cores) || [];
-
-    ctx.clearRect(0, 0, ringsCanvas.width, ringsCanvas.height);
-    for (var i = cores.length - 1; i >= 0; i--) {
-      var load = cores[i] || 0;
-      drawRing(
-        ctx,
-        CPU_CENTER_X,
-        CPU_CENTER_Y,
-        25 + i * 7,
-        6,
-        30,
-        330,
-        false,
-        load / 100,
-        0,
-        0.5,
-        RING_HUE,
-        0.5,
-      );
-    }
-
     var used = m && m.memory ? m.memory.used : 0;
     var total = m && m.memory ? m.memory.total : 1;
-    drawRing(
-      ctx,
-      MEM_CENTER_X,
-      MEM_CENTER_Y,
-      30,
-      12,
-      90,
-      180,
-      true,
-      used / total,
-      RING_HUE,
-      0.25,
-      RING_HUE,
-      0.65,
-    );
+    var tx = m && m.network ? m.network.txBytesPerSec : 0;
+    var rx = m && m.network ? m.network.rxBytesPerSec : 0;
 
     if (elCpuTemp) {
       if (m && typeof m.cpuTempC === "number") elCpuTemp.textContent = Math.round(m.cpuTempC) + "°";
@@ -159,14 +124,12 @@
 
     if (elMemData) elMemData.textContent = formatGiB(used) + "/" + formatGiB(total);
 
-    var tx = m && m.network ? m.network.txBytesPerSec : 0;
-    var rx = m && m.network ? m.network.rxBytesPerSec : 0;
     if (elNetUp) elNetUp.textContent = formatRate(tx);
     if (elNetDown) elNetDown.textContent = formatRate(rx);
 
     if (elExternalIp) {
       var ip = m && m.externalIp ? String(m.externalIp).trim() : "";
-      elExternalIp.textContent = ip ? ip : "";
+      elExternalIp.textContent = ip ? ip : "—";
     }
 
     if (elBattery) {
@@ -178,6 +141,44 @@
     upHistory.shift();
     downHistory.push(-rx);
     downHistory.shift();
+
+    if (ctx && ringsCanvas) {
+      ctx.clearRect(0, 0, ringsCanvas.width, ringsCanvas.height);
+      for (var i = cores.length - 1; i >= 0; i--) {
+        var load = cores[i] || 0;
+        drawRing(
+          ctx,
+          CPU_CENTER_X,
+          CPU_CENTER_Y,
+          25 + i * 7,
+          6,
+          30,
+          330,
+          false,
+          load / 100,
+          0,
+          0.5,
+          RING_HUE,
+          0.5,
+        );
+      }
+
+      drawRing(
+        ctx,
+        MEM_CENTER_X,
+        MEM_CENTER_Y,
+        30,
+        12,
+        90,
+        180,
+        true,
+        used / total,
+        RING_HUE,
+        0.25,
+        RING_HUE,
+        0.65,
+      );
+    }
 
     if (ctxUp) {
       var maxUp = 1;
