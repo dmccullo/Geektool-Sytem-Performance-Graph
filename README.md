@@ -4,14 +4,14 @@ Standalone GeekTool web widget project for:
 
 - CPU ring graph
 - Memory ring graph
-- Network mini bar graphs
+- Network mini bar graphs (Up / Down / Public IP)
 - Battery status
 
 This project is intentionally separated from `Geektool-System-Perfomance-geeklet`.
 
 ## Preview
 
-![GeekTool system performance graph widget](assets/performance-graph-widget.png)
+![GeekTool web widget: CPU and memory rings, battery, network bar charts, and Up / Down / Public IP](assets/performance-graph-widget.png)
 
 ## Requirements
 
@@ -109,7 +109,7 @@ http://127.0.0.1:26499
   - Uses `systeminformation` first.
   - Falls back to `osx-cpu-temp` on macOS if available.
 - If no valid temp is available, it stays hidden.
-- **External IP** (shown under Up/Down) uses the same lookup as:
+- **External IP** (Public IP row under Down) uses the same lookup as:
   - `dig +short myip.opendns.com @resolver1.opendns.com`
   - macOS includes `dig` at `/usr/bin/dig` in most setups.
   - Result is cached for **5 minutes** so the widget does not query OpenDNS on every refresh.
