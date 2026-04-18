@@ -51,6 +51,12 @@ npm run setup
 npm start
 ```
 
+By default the server stays **quiet** (no per-request console logs). For Fastify access logs while debugging:
+
+```bash
+VERBOSE=1 npm start
+```
+
 Stop the server (frees the default port **26498**; respects `PORT` if you set it when starting):
 
 ```bash

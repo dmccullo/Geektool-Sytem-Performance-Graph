@@ -7,8 +7,12 @@ import { collectMetrics } from "./metrics.js";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = Number.parseInt(process.env.PORT || "26498", 10);
 const HOST = process.env.HOST || "127.0.0.1";
+const verbose = process.env.VERBOSE === "1";
 
-const app = Fastify({ logger: true });
+const app = Fastify({
+  // Quiet by default (GeekTool-friendly). Set VERBOSE=1 for per-request logs.
+  logger: verbose,
+});
 
 app.get("/api/health", async () => ({ ok: true }));
 
@@ -17,7 +21,9 @@ app.get("/api/metrics", async (_req, reply) => {
     const metrics = await collectMetrics();
     return reply.send(metrics);
   } catch (err) {
-    app.log.error(err);
+    if (verbose) {
+      app.log.error(err);
+    }
     return reply.status(500).send({ error: "metrics_failed" });
   }
 });
@@ -41,10 +47,6 @@ try {
 } catch (err: unknown) {
   const code = err && typeof err === "object" && "code" in err ? String((err as { code: unknown }).code) : "";
   if (code === "EADDRINUSE") {
-    app.log.error(
-      { port: PORT, host: HOST },
-      "Port already in use — another copy of this server (or another app) is listening.",
-    );
     console.error(`
 Port ${PORT} is already in use on ${HOST}.
 
@@ -61,5 +63,7 @@ Fix one of:
   throw err;
 }
 
-app.log.info(`Dashboard API at http://${HOST}:${PORT}/api/metrics`);
-app.log.info(`UI at http://${HOST}:${PORT}/`);
+if (verbose) {
+  app.log.info(`Dashboard API at http://${HOST}:${PORT}/api/metrics`);
+  app.log.info(`UI at http://${HOST}:${PORT}/`);
+}
