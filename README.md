@@ -69,6 +69,18 @@ Then point a GeekTool **Web** geeklet to:
 http://127.0.0.1:26498
 ```
 
+### `npm start` never returns to the shell
+
+That is normal: this command runs a **long-lived** web server. You should see a line like `Listening on http://127.0.0.1:26498/` once it is ready. Leave that terminal open, or run the server in the background with your own process manager. To stop it from another terminal: `npm run stop` (or Ctrl+C in the terminal where it is running).
+
+To confirm the server is responding:
+
+```bash
+curl -sS http://127.0.0.1:26498/api/health
+```
+
+Other local GeekTool helpers (for example Apple Music **serve-controls**) use a **different** port by default and do not need to match this one.
+
 ### Port already in use (`EADDRINUSE`)
 
 Only **one** process can listen on `127.0.0.1:26498`. If `npm start` fails with that error, GeekTool is still using an **older** server (and you will not see newer UI like the external IP).

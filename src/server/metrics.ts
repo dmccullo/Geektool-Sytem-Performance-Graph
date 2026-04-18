@@ -1,6 +1,22 @@
 import { execFileSync } from "node:child_process";
 import si from "systeminformation";
 
+/** Avoid hung GeekTool widgets if a systeminformation call never resolves. */
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T | null> {
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error(`timeout after ${ms}ms`)), ms);
+      }),
+    ]);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[metrics] ${label}: ${msg}`);
+    return null;
+  }
+}
+
 export type MetricsPayload = {
   cpu: { cores: number[] };
   cpuTempC: number | null;
@@ -105,25 +121,35 @@ function getExternalIpCached(): string | null {
 
 export async function collectMetrics(): Promise<MetricsPayload> {
   const [load, mem, temps, defaultIface] = await Promise.all([
-    si.currentLoad(),
-    si.mem(),
-    si.cpuTemperature(),
-    si.networkInterfaceDefault(),
+    withTimeout(si.currentLoad(), 12_000, "currentLoad"),
+    withTimeout(si.mem(), 12_000, "mem"),
+    withTimeout(si.cpuTemperature(), 6_000, "cpuTemperature"),
+    withTimeout(si.networkInterfaceDefault(), 12_000, "networkInterfaceDefault"),
   ]);
 
+  type LoadT = Awaited<ReturnType<typeof si.currentLoad>>;
+  type MemT = Awaited<ReturnType<typeof si.mem>>;
+  type TempT = Awaited<ReturnType<typeof si.cpuTemperature>>;
+
+  const loadSafe: LoadT =
+    load ?? ({ cpus: [], currentLoad: 0, avgLoad: 0 } as unknown as LoadT);
+
+  const memSafe: MemT = mem ?? ({ total: 1, used: 0, free: 1 } as unknown as MemT);
+
   const coresRaw =
-    load.cpus.length > 0
-      ? load.cpus
-      : [{ load: load.currentLoad ?? load.avgLoad ?? 0 }];
+    loadSafe.cpus.length > 0
+      ? loadSafe.cpus
+      : [{ load: loadSafe.currentLoad ?? loadSafe.avgLoad ?? 0 }];
   const cores = coresRaw.map((c) =>
     Math.min(100, Math.max(0, Number.isFinite(c.load) ? c.load : 0)),
   );
 
+  const tempsSafe = temps ?? ({} as TempT);
   let cpuTempC: number | null = null;
-  if (typeof temps.main === "number" && Number.isFinite(temps.main)) {
-    cpuTempC = temps.main;
-  } else if (typeof temps.max === "number" && Number.isFinite(temps.max)) {
-    cpuTempC = temps.max;
+  if (typeof tempsSafe.main === "number" && Number.isFinite(tempsSafe.main)) {
+    cpuTempC = tempsSafe.main;
+  } else if (typeof tempsSafe.max === "number" && Number.isFinite(tempsSafe.max)) {
+    cpuTempC = tempsSafe.max;
   }
   if (cpuTempC == null && process.platform === "darwin") {
     cpuTempC = readCpuTempFromCli();
@@ -133,16 +159,16 @@ export async function collectMetrics(): Promise<MetricsPayload> {
   let txBytesPerSec = 0;
   let iface = defaultIface || "";
   if (defaultIface) {
-    const stats = await si.networkStats(defaultIface);
-    const row = Array.isArray(stats) ? stats[0] : stats;
+    const stats = await withTimeout(si.networkStats(defaultIface), 8_000, "networkStats");
+    const row = stats ? (Array.isArray(stats) ? stats[0] : stats) : null;
     if (row) {
       rxBytesPerSec = row.rx_sec ?? 0;
       txBytesPerSec = row.tx_sec ?? 0;
     }
   }
 
-  const total = mem.total || 1;
-  const used = mem.used ?? total - (mem.free ?? 0);
+  const total = memSafe.total || 1;
+  const used = memSafe.used ?? total - (memSafe.free ?? 0);
   const externalIp = getExternalIpCached();
 
   return {
@@ -151,7 +177,7 @@ export async function collectMetrics(): Promise<MetricsPayload> {
     memory: {
       total,
       used,
-      free: mem.free ?? 0,
+      free: memSafe.free ?? 0,
       percent: (used / total) * 100,
     },
     network: {

@@ -44,6 +44,11 @@ app.setNotFoundHandler((req, reply) => {
 
 try {
   await app.listen({ port: PORT, host: HOST });
+  // Always log once: the process is supposed to keep running (GeekTool polls this server).
+  console.log(`Listening on http://${HOST}:${PORT}/  (Ctrl+C to stop; npm run stop frees the port)`);
+  if (!verbose) {
+    console.log(`Tip: set VERBOSE=1 for per-request logs. Quick check: curl http://${HOST}:${PORT}/api/health`);
+  }
 } catch (err: unknown) {
   const code = err && typeof err === "object" && "code" in err ? String((err as { code: unknown }).code) : "";
   if (code === "EADDRINUSE") {

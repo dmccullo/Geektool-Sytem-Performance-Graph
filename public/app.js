@@ -197,6 +197,7 @@
     var url = "/api/metrics?_=" + new Date().getTime();
     var req = new XMLHttpRequest();
     req.open("GET", url, true);
+    req.timeout = 20000;
     req.onreadystatechange = function () {
       if (req.readyState !== 4) return;
       if (req.status >= 200 && req.status < 300) {
@@ -209,6 +210,9 @@
       } else {
         if (elMemData) elMemData.textContent = "offline";
       }
+    };
+    req.ontimeout = function () {
+      if (elMemData) elMemData.textContent = "offline";
     };
     req.send();
   }
