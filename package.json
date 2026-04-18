@@ -8,7 +8,8 @@
   },
   "scripts": {
     "setup": "./install.sh",
-    "start": "tsx src/server/index.ts"
+    "start": "tsx src/server/index.ts",
+    "stop": "./scripts/stop.sh"
   },
   "dependencies": {
     "@fastify/static": "^8.0.4",

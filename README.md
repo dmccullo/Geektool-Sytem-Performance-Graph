@@ -51,6 +51,12 @@ npm run setup
 npm start
 ```
 
+Stop the server (frees the default port **26498**; respects `PORT` if you set it when starting):
+
+```bash
+npm run stop
+```
+
 Then point a GeekTool **Web** geeklet to:
 
 ```text
