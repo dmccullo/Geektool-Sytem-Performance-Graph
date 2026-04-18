@@ -100,6 +100,7 @@
   var elMemData = document.getElementById("mem-data");
   var elNetUp = document.getElementById("net-up");
   var elNetDown = document.getElementById("net-down");
+  var elExternalIp = document.getElementById("external-ip");
   var elBattery = document.getElementById("battery-row");
 
   var upHistory = [];
@@ -162,6 +163,11 @@
     var rx = m && m.network ? m.network.rxBytesPerSec : 0;
     if (elNetUp) elNetUp.textContent = formatRate(tx);
     if (elNetDown) elNetDown.textContent = formatRate(rx);
+
+    if (elExternalIp) {
+      var ip = m && m.externalIp ? String(m.externalIp).trim() : "";
+      elExternalIp.textContent = ip ? ip : "";
+    }
 
     if (elBattery) {
       if (m && m.battery) elBattery.textContent = "Battery " + m.battery.percent + "% · " + m.battery.state;

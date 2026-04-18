@@ -15,6 +15,8 @@ export type MetricsPayload = {
     rxBytesPerSec: number;
     txBytesPerSec: number;
   };
+  /** Public IPv4/IPv6 from OpenDNS dig, or null if unavailable */
+  externalIp: string | null;
   battery: { percent: number; state: string } | null;
 };
 
@@ -60,6 +62,43 @@ function readCpuTempFromCli(): number | null {
   return null;
 }
 
+const EXTERNAL_IP_TTL_MS = 5 * 60 * 1000;
+let externalIpCache: { value: string | null; at: number } = { value: null, at: 0 };
+
+function readExternalIpViaDig(): string | null {
+  const digCandidates = ["/usr/bin/dig", "dig"];
+  for (const cmd of digCandidates) {
+    try {
+      const out = execFileSync(
+        cmd,
+        ["+short", "myip.opendns.com", "@resolver1.opendns.com"],
+        { encoding: "utf8", timeout: 4000 },
+      )
+        .trim()
+        .split(/\r?\n/)
+        .map((s) => s.trim())
+        .filter(Boolean)[0];
+      if (!out) continue;
+      if (/^[\d.]+$/.test(out) || /^[0-9a-f:.]+$/i.test(out)) {
+        return out;
+      }
+    } catch {
+      // try next dig path
+    }
+  }
+  return null;
+}
+
+function getExternalIpCached(): string | null {
+  const now = Date.now();
+  if (now - externalIpCache.at < EXTERNAL_IP_TTL_MS) {
+    return externalIpCache.value;
+  }
+  const ip = readExternalIpViaDig();
+  externalIpCache = { value: ip, at: now };
+  return ip;
+}
+
 export async function collectMetrics(): Promise<MetricsPayload> {
   const [load, mem, temps, defaultIface] = await Promise.all([
     si.currentLoad(),
@@ -100,6 +139,7 @@ export async function collectMetrics(): Promise<MetricsPayload> {
 
   const total = mem.total || 1;
   const used = mem.used ?? total - (mem.free ?? 0);
+  const externalIp = getExternalIpCached();
 
   return {
     cpu: { cores },
@@ -115,6 +155,7 @@ export async function collectMetrics(): Promise<MetricsPayload> {
       rxBytesPerSec,
       txBytesPerSec,
     },
+    externalIp,
     battery: process.platform === "darwin" ? readBatteryMac() : null,
   };
 }

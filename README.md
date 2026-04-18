@@ -63,6 +63,10 @@ http://127.0.0.1:26498
   - Uses `systeminformation` first.
   - Falls back to `osx-cpu-temp` on macOS if available.
 - If no valid temp is available, it stays hidden.
+- **External IP** (shown under Up/Down) uses the same lookup as:
+  - `dig +short myip.opendns.com @resolver1.opendns.com`
+  - macOS includes `dig` at `/usr/bin/dig` in most setups.
+  - Result is cached for **5 minutes** so the widget does not query OpenDNS on every refresh.
 - Server listens on `127.0.0.1:26498` by default.
 
 ## License
