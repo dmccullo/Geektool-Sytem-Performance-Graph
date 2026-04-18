@@ -36,6 +36,30 @@ app.setNotFoundHandler((req, reply) => {
   return reply.sendFile("index.html");
 });
 
-await app.listen({ port: PORT, host: HOST });
+try {
+  await app.listen({ port: PORT, host: HOST });
+} catch (err: unknown) {
+  const code = err && typeof err === "object" && "code" in err ? String((err as { code: unknown }).code) : "";
+  if (code === "EADDRINUSE") {
+    app.log.error(
+      { port: PORT, host: HOST },
+      "Port already in use — another copy of this server (or another app) is listening.",
+    );
+    console.error(`
+Port ${PORT} is already in use on ${HOST}.
+
+Fix one of:
+  1) Stop the other process, then run npm start again:
+       lsof -nP -iTCP:${PORT} -sTCP:LISTEN
+       kill <PID>
+
+  2) Use a different port (update your GeekTool Web URL to match):
+       PORT=26499 npm start
+`);
+    process.exit(1);
+  }
+  throw err;
+}
+
 app.log.info(`Dashboard API at http://${HOST}:${PORT}/api/metrics`);
 app.log.info(`UI at http://${HOST}:${PORT}/`);

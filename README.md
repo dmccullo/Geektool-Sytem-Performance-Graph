@@ -57,6 +57,40 @@ Then point a GeekTool **Web** geeklet to:
 http://127.0.0.1:26498
 ```
 
+### Port already in use (`EADDRINUSE`)
+
+Only **one** process can listen on `127.0.0.1:26498`. If `npm start` fails with that error, GeekTool is still using an **older** server (and you will not see newer UI like the external IP).
+
+1. See what is using the port:
+
+```bash
+lsof -nP -iTCP:26498 -sTCP:LISTEN
+```
+
+2. Stop it (replace `<PID>` with the number from the `lsof` output):
+
+```bash
+kill <PID>
+```
+
+3. Start this project again from **your** clone:
+
+```bash
+cd ~/Documents/Geektool/Geektool-Sytem-Performance-Graph
+git pull
+npm start
+```
+
+Or use another port and **change the GeekTool URL** to match:
+
+```bash
+PORT=26499 npm start
+```
+
+```text
+http://127.0.0.1:26499
+```
+
 ## Notes
 
 - CPU temp is best-effort:
